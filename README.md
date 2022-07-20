@@ -2,6 +2,8 @@
 
 Описание базы данных:
  https://edu.postgrespro.ru/bookings.pdf
+ 
+ ![image](https://user-images.githubusercontent.com/85709710/179974450-8330ef93-0da2-4fc8-9d26-2d1d0b98ead2.png)
 
 **1).Аэропорты с рейсами, выполняемые самолетом с максимальной дальностью перелета:**
 
@@ -126,13 +128,18 @@ join max_seats_by_aircraft m on m.aircraft_code = b.aircraft_code
 **5).Процентное соотношение перелетов по типам самолетов от общего количества.**
 
 ```
-select aircraft_code, round(number_of_flights/(select sum(number_of_flights)::float as "result"
-from (select aircraft_code, count(aircraft_code) as number_of_flights
-from flights
-group by aircraft_code) as fl_s)*100) as "%_flight"
-from (select aircraft_code, count(aircraft_code)::float as number_of_flights
-from flights
-group by aircraft_code) as f_s
+select	aircraft_code,
+	round(number_of_flights/(select sum(number_of_flights)::float as "result"
+from (
+	select	aircraft_code,
+		count(aircraft_code) as number_of_flights
+	from flights
+	group by aircraft_code) as fl_s)*100) as "%_flight"
+	from (
+		select	aircraft_code,
+			count(aircraft_code)::float as number_of_flights
+		from flights
+		group by aircraft_code) as f_s
 group by aircraft_code, number_of_flights
 ```
 
@@ -140,16 +147,23 @@ group by aircraft_code, number_of_flights
 
 ```
 with cte_1 as (
-	select flight_id, fare_conditions, amount
+	select	flight_id,
+		fare_conditions,
+		amount
 	from ticket_flights
 	where fare_conditions = 'Business'
 	group by flight_id, fare_conditions, amount
-	order by flight_id),
-cte_2 as (select flight_id, fare_conditions, amount
+	order by flight_id
+	),
+cte_2 as (
+	select	flight_id,
+		fare_conditions,
+		amount
 	from ticket_flights
 	where fare_conditions = 'Economy'
 	group by flight_id, fare_conditions, amount
-	order by flight_id)
+	order by flight_id
+	)
 select departure_city, arrival_city
 from cte_1
 join cte_2 using (flight_id)
