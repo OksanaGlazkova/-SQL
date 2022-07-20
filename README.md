@@ -65,13 +65,22 @@ where bp.boarding_no is null
 _Накопление пассажиров по каждому аэропорту за все время глобально в порядке идентификатора перелета:_
 
 ```
-select f1.departure_airport, flight_id, total_boarding_no, (total_seat_no-total_boarding_no) as empty_spaces, (total_seat_no-total_boarding_no)/total_seat_no*100 as "%_empty_spaces", sum(total_boarding_no) over (partition by f1.departure_airport order by flight_id) as "Накопление пассажиров"
+select	f1.departure_airport,
+	flight_id,
+	total_boarding_no,
+	(total_seat_no-total_boarding_no) as empty_spaces,
+	(total_seat_no-total_boarding_no)/total_seat_no*100 as "%_empty_spaces",
+	sum(total_boarding_no) over (partition by f1.departure_airport order by flight_id) as "Накопление пассажиров"
 from (
-		select flight_id, aircraft_code, count(boarding_no)::float as total_boarding_no, s.total_seat_no
+		select	flight_id,
+			aircraft_code,
+			count(boarding_no)::float as total_boarding_no,
+			s.total_seat_no
 		from boarding_passes b
 		left join flights f using (flight_id)
 		left join (
-			select aircraft_code, count(seat_no)::float as total_seat_no
+			select	aircraft_code,
+				count(seat_no)::float as total_seat_no
 			from seats
 			group by aircraft_code
 			) as s using (aircraft_code)
@@ -86,18 +95,29 @@ _Накопление пассажиров из каждого аэропорт�
 
 ```
 with boarded as (
-	select f.flight_id, f.flight_no, f.aircraft_code, f.departure_airport, f.scheduled_departure, f.actual_departure, count(bp.boarding_no) as total_boarding_no
+	select	f.flight_id,
+		f.flight_no,
+		f.aircraft_code,
+		f.departure_airport,
+		f.scheduled_departure,
+		f.actual_departure,
+		count(bp.boarding_no) as total_boarding_no
 	from flights f 
 	join boarding_passes bp on bp.flight_id = f.flight_id 
 	where f.actual_departure is not null
 	group by f.flight_id 
 ),
 max_seats_by_aircraft as(
-	select s.aircraft_code,	count(s.seat_no) max_seats
+	select	s.aircraft_code,
+		count(s.seat_no) max_seats
 	from seats s 
 	group by s.aircraft_code 
 )
-select b.flight_no,	b.departure_airport, b.scheduled_departure, b.actual_departure,	b.total_boarding_no, m.max_seats - b.total_boarding_no as empty_spaces, round((m.max_seats - b.total_boarding_no) / m.max_seats :: dec, 2) * 100 "%_empty_spaces",
+select	b.flight_no,
+	b.departure_airport,
+	b.scheduled_departure, b.actual_departure,
+	b.total_boarding_no, m.max_seats - b.total_boarding_no as empty_spaces,
+	round((m.max_seats - b.total_boarding_no) / m.max_seats :: dec, 2) * 100 "%_empty_spaces",
 	sum(b.total_boarding_no) over (partition by (b.departure_airport, b.actual_departure::date) order by b.actual_departure) as "Накопление пассажиров"
 from boarded b 
 join max_seats_by_aircraft m on m.aircraft_code = b.aircraft_code
