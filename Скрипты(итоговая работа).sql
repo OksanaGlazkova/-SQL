@@ -8,17 +8,12 @@ having count (city) > 1
 
 2.
 
-В целом, можно вывести такой запрос:
-
 select distinct departure_airport
 from flights f
 where aircraft_code = (select aircraft_code 
 from aircrafts 
 order by "range" desc
 limit 1)
-
-Логично, что аэропорты вылета и прилёта идентичны, т.к. самолёт прилетает в аэропорт и будет из него потом вылетать.
-Но захотелось получить этому подтверждение, поэтому собрала другой запрос:
 
 select distinct arrival_airport
 from flights f
@@ -52,7 +47,7 @@ where bp.boarding_no is null
 5.
 
 select f1.departure_airport, flight_id, total_boarding_no, (total_seat_no-total_boarding_no) as empty_spaces, (total_seat_no-total_boarding_no)/total_seat_no*100 as "%_empty_spaces",
-	sum(total_boarding_no) over (partition by f1.departure_airport order by flight_id) as "Накопление пассажиров"
+	sum(total_boarding_no) over (partition by f1.departure_airport order by flight_id) as "ГЌГ ГЄГ®ГЇГ«ГҐГ­ГЁГҐ ГЇГ Г±Г±Г Г¦ГЁГ°Г®Гў"
 from (
 		select flight_id, aircraft_code, count(boarding_no)::float as total_boarding_no, s.total_seat_no
 		from boarding_passes b
@@ -81,7 +76,7 @@ max_seats_by_aircraft as(
 	group by s.aircraft_code 
 )
 select b.flight_no,	b.departure_airport, b.scheduled_departure, b.actual_departure,	b.total_boarding_no, m.max_seats - b.total_boarding_no as empty_spaces, round((m.max_seats - b.total_boarding_no) / m.max_seats :: dec, 2) * 100 "%_empty_spaces",
-	sum(b.total_boarding_no) over (partition by (b.departure_airport, b.actual_departure::date) order by b.actual_departure) as "Накопление пассажиров"
+	sum(b.total_boarding_no) over (partition by (b.departure_airport, b.actual_departure::date) order by b.actual_departure) as "ГЌГ ГЄГ®ГЇГ«ГҐГ­ГЁГҐ ГЇГ Г±Г±Г Г¦ГЁГ°Г®Гў"
 from boarded b 
 join max_seats_by_aircraft m on m.aircraft_code = b.aircraft_code;
 		
