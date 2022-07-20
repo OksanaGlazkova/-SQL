@@ -3,7 +3,7 @@
 Описание базы данных:
  https://edu.postgrespro.ru/bookings.pdf
 
-**Аэропорты с рейсами, выполняемые самолетом с максимальной дальностью перелета:**
+**1).Аэропорты с рейсами, выполняемые самолетом с максимальной дальностью перелета:**
 
 _В целом, можно вывести такой запрос:_
 
@@ -41,7 +41,7 @@ where aircraft_code =(
 	)
 ```
 
-**10 рейсов с макс.временем задержки вылета:**
+**2).10 рейсов с макс.временем задержки вылета:**
 
 ```
 select flight_no, actual_departure - scheduled_departure as departure_delay_actually
@@ -51,7 +51,7 @@ order by departure_delay_actually desc
 limit 10
 ```
 
-**Брони, по которым не были получены посадочные талоны:**
+**3).Брони, по которым не были получены посадочные талоны:**
 
 ```
 select t.book_ref, bp.boarding_no
@@ -60,7 +60,7 @@ left join boarding_passes bp on t.ticket_no = bp.ticket_no
 where bp.boarding_no is null
 ```
 
-**Количество свободных мест для каждого рейса, их % отношение к общему количеству мест в самолете:**
+**4).Количество свободных мест для каждого рейса, их % отношение к общему количеству мест в самолете:**
 
 _Накопление пассажиров по каждому аэропорту за все время глобально в порядке идентификатора перелета:_
 
@@ -123,7 +123,7 @@ from boarded b
 join max_seats_by_aircraft m on m.aircraft_code = b.aircraft_code
 ```
 
-**Процентное соотношение перелетов по типам самолетов от общего количества.**
+**5).Процентное соотношение перелетов по типам самолетов от общего количества.**
 
 ```
 select aircraft_code, round(number_of_flights/(select sum(number_of_flights)::float as "result"
@@ -136,7 +136,7 @@ group by aircraft_code) as f_s
 group by aircraft_code, number_of_flights
 ```
 
-**Города, в которые можно  добраться бизнес - классом дешевле, чем эконом-классом в рамках перелета:**
+**6).Города, в которые можно  добраться бизнес - классом дешевле, чем эконом-классом в рамках перелета:**
 
 ```
 with cte_1 as (
@@ -157,7 +157,7 @@ join flights_v using (flight_id)
 where cte_1.flight_id = cte_2.flight_id and cte_2.amount > cte_1.amount
 ```
 
-**Города, между которых нет прямых рейсов:**
+**7).Города, между которых нет прямых рейсов:**
 
 ```
 create materialized view task_2 as
