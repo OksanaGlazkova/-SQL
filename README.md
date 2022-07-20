@@ -7,13 +7,13 @@
 
 _В целом, можно вывести такой запрос:_
 
-select distinct departure_airport  
+>select distinct departure_airport  
 from flights f  
 where aircraft_code = (  
   select aircraft_code  
 from aircrafts   
 order by "range" desc  
-limit 1  )
+limit 1  )>
 
 _Логично, что аэропорты вылета и прилёта идентичны, т.к. самолёт прилетает в аэропорт и будет из него потом вылетать.
 Но захотелось получить этому подтверждение (отмести теорию о том, что его могут перевезти из аэропорта в аэропорт), поэтому собрала другой запрос:_
